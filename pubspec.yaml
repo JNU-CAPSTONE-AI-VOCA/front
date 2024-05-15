@@ -18,8 +18,8 @@ dependencies:
   http: ^1.2.1
   dio: ^5.4.2+1
   future_progress_dialog: ^0.2.0
-
   cupertino_icons: ^1.0.6
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:
