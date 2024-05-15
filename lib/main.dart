@@ -169,10 +169,11 @@ class _InputDemoState extends State<InputDemo> {
     final directory = await getApplicationDocumentsDirectory();
     File file = File('${directory.path}/VOCA_LIST.json');
 
-    await file.delete(); // 파일 초기화하기
 
-    print('${file.path}\n');
-    print(file.path.toString());
+    // await file.delete(); // 파일 초기화하기
+    //
+    // print('${file.path}\n');
+    // print(file.path.toString());
 
     // 파일이 없으면 생성해 주기
     if (!file.existsSync()) {

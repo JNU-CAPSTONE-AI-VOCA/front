@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:temp/resultStreamScreen.dart';
 import 'result.dart';
 import 'widgets/my_bottom_bar.dart';
 
@@ -81,20 +82,34 @@ class _UploadPDFState extends State<UploadPDF> {
     }
   }
 
+  // Future<void> showProgress() async {
+  //   await showDialog(
+  //     context: context,
+  //     builder: (context) =>
+  //         FutureProgressDialog(_uploadFile(), message: Text('Loading...'),),
+  //   );
+  //   // 페이지 이동 로직
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => VocabularyListScreen(data: jsonData),
+  //     ),
+  //   );
+  // }
+
+  // go to ResultStreamScreen
   Future<void> showProgress() async {
-    await showDialog(
-      context: context,
-      builder: (context) =>
-          FutureProgressDialog(_uploadFile(), message: Text('Loading...'),),
-    );
+    List<int> fileBytes = selectedPDF.files.single.bytes!;
     // 페이지 이동 로직
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VocabularyListScreen(data: jsonData),
+        builder: (context) => ResultStreamScreen(data: fileBytes),
       ),
     );
   }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'widgets/my_bottom_bar.dart';
 import 'voca.dart';
@@ -14,37 +16,50 @@ Map<String, dynamic> saveFile = {};
 List<dynamic> words = [];
 Map<String, dynamic> word = {};
 
-class VocabularyListScreen extends StatefulWidget {
-  final List<dynamic> data;
+class ResultStreamScreen extends StatefulWidget {
+  final List<int> data;
 
-  VocabularyListScreen({Key? key, required this.data}) : super(key: key);
+  ResultStreamScreen({Key? key, required this.data}) : super(key: key);
 
   @override
-  _VocabularyListScreenState createState() => _VocabularyListScreenState(jsonData: data);
+  _ResultStreamScreenState createState() => _ResultStreamScreenState(fileBytes: data);
 }
 
-class _VocabularyListScreenState extends State<VocabularyListScreen> {
-  List<dynamic> jsonData = [];
+class _ResultStreamScreenState extends State<ResultStreamScreen> {
+  List jsonData = [];
+  List tmpJsonData = [];
+  List<int> fileBytes= [];
 
-  _VocabularyListScreenState({required this.jsonData});
+
+  _ResultStreamScreenState({required this.fileBytes});
   @override
   void initState() {
     super.initState();
-    loadData();
+
+    print(fileBytes);
+    sseConnect();
   }
 
-  Future<void> loadData() async {
-    print(jsonData.toString());
-    print(jsonData.runtimeType);
+  void sseConnect() async {
+    var response = await Dio().post(
+        'http://10.0.2.2:8080/api/files/extract/words/stream',
+        data: FormData.fromMap({
+          'files': MultipartFile.fromBytes(fileBytes, filename: Uuid().v4() + '.pdf'),
+        }),
+        options: Options(
+          contentType: 'multipart/form-data',
+          responseType: ResponseType.stream,
+        ),
+    );
 
-    setState(() {
-      // jsonData 에 단어 마다 'isChecked': false 라는 key:value 생성
-      for (var i in jsonData) {
-        for (var j in i['words']) {
-          j['isChecked'] = false;
-        }
-      }
+    response.data.stream.listen((data) {
+      setState(() {
+        tmpJsonData.add(jsonDecode(utf8.decode(data)));
+        jsonData.add(jsonDecode(utf8.decode(data)));
+        // print(jsonDecode(utf8.decode(data)));
+      });
     });
+
   }
 
   @override
@@ -128,17 +143,13 @@ class _VocabularyListScreenState extends State<VocabularyListScreen> {
                                         ],
                                       ),
                                       leading: Checkbox(
-                                        value: jsonData[i]['words'][j]['isChecked'],
+                                        value: jsonData[i]['words'][j]['isChecked'] ?? false,
                                         onChanged: (bool? value) {
                                           setState(() {
-                                            if (value ?? false) {
-                                              // selectedData 에 해당 wordItem 이 없다면
-                                              jsonData[i]['words'][j]['isChecked'] = true;
-                                            } else {
-                                              // 있다면
+                                            if (jsonData[i]['words'][j]['isChecked'] == null) {
                                               jsonData[i]['words'][j]['isChecked'] = false;
                                             }
-                                            print(jsonData[i]['words'][j]['isChecked']);
+                                            jsonData[i]['words'][j]['isChecked'] = value ?? false;
                                           });
                                         },
                                       ),
@@ -237,10 +248,13 @@ class _VocabularyListScreenState extends State<VocabularyListScreen> {
       Map<String, dynamic> fileMap = json.decode(fileContent);
       for (var i in jsonData) { // 선택 정보를 담게된 jsonData
         for (var j in i['words']) {
-          if (j['isChecked']) { // 체크된 항목이라면
-            // 주의 : 서버에서 받은 데이터는 meaning 이고 우리는 mean 으로 사용할 것임
-            Voca voca = Voca(word: j['word'], mean: j['meaning'], sentence: i['sentence']); // {word, mean, sentence}
-            fileMap['words'].add(voca); // 리스트에 추가함, 아직 파일에 쓰지는 않았음
+          //null check
+          if (j['isChecked'] != null ) {
+            if (j['isChecked']) { // 체크된 항목이라면
+              // 주의 : 서버에서 받은 데이터는 meaning 이고 우리는 mean 으로 사용할 것임
+              Voca voca = Voca(word: j['word'], mean: j['meaning'], sentence: i['sentence']); // {word, mean, sentence}
+              fileMap['words'].add(voca); // 리스트에 추가함, 아직 파일에 쓰지는 않았음
+            }
           }
         }
       }
