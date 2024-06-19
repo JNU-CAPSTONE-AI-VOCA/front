@@ -18,6 +18,14 @@ dependencies:
   http: ^1.2.1
   dio: ^5.4.2+1
   future_progress_dialog: ^0.2.0
+<<<<<<< Updated upstream
+=======
+  uuid: ^4.4.0
+  fluttertoast: ^8.2.6
+  flutter_slidable: ^3.1.0
+  image_picker: ^1.1.2
+
+>>>>>>> Stashed changes
   cupertino_icons: ^1.0.6
   uuid: ^4.4.0
 

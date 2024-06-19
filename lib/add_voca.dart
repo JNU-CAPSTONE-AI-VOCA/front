@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'widgets/my_bottom_bar.dart';
-import 'voca.dart';
+import 'widgets/voca.dart';
 
 var backColor = Color(0xffeeebeb);
 
@@ -22,7 +22,7 @@ class _AddVoca extends State<AddVoca> {
   String selectedFileName = '';
 
   String word = '';
-  String mean = '';
+  String meaning = '';
   String sentence = '';
   TextEditingController _WordController = TextEditingController();
   TextEditingController _MeanController = TextEditingController();
@@ -44,13 +44,14 @@ class _AddVoca extends State<AddVoca> {
           ),
           ),
           backgroundColor: backColor,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {},
-          ),
-          title: Text(
-            'add_voca',
-            style: TextStyle(fontSize: 28),
+          title: Row(
+            children: [
+              SizedBox(width: 15,),
+              Text(
+                'add_voca',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           actions: [
             Padding(
@@ -125,7 +126,7 @@ class _AddVoca extends State<AddVoca> {
                                 onChanged: (text) {
                                   setState(() {
                                     _isMeanLabelVisible = text.isEmpty; // 입력이 비어있으면 라벨을 보여줌
-                                    mean = _MeanController.text;
+                                    meaning = _MeanController.text;
                                   });
                                 },
                                 decoration: InputDecoration(
@@ -222,7 +223,7 @@ class _AddVoca extends State<AddVoca> {
   }
 
   void addVocabularyToJsonFile() async {
-    Voca voca = Voca(word: word, mean: mean, sentence: sentence);
+    Voca voca = Voca(word: word, meaning: meaning, sentence: sentence);
 
     // 현재 파일 경로로 수정할 것
     final directory = await getApplicationDocumentsDirectory();

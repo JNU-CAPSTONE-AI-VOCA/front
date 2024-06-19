@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'voca_list.dart';
 import 'widgets/my_bottom_bar.dart';
 import 'start_screen.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 var backColor = Color(0xffeeebeb);
 
@@ -33,6 +35,7 @@ class _InputDemoState extends State<InputDemo> {
 
   // 버튼 눌렀을 때 해당 단어장 이름을 담는 변수
   String selectedFileName = '';
+  List<Widget> buttonsList = [];
 
   @override
   void initState() {
@@ -40,19 +43,36 @@ class _InputDemoState extends State<InputDemo> {
     repeatListNum();
   }
 
-  // @override
-  // void didChangeDependencies() { // repeatListNum 함수를 위젯 build 전에 한번 돌리기 위해 작성한 함수
-  //   super.didChangeDependencies();
-  //   repeatListNum();
-  // }
-  //
-  // @override
-  // void dispose() {
-  //   voca_nameController.dispose();
-  //   super.dispose();
-  // }
+  void _deleteItem (int button_index) async{
+    // 단어장 파일 가져와서 읽기
+    int voca_index = button_index~/2;
+    final directory = await getApplicationDocumentsDirectory();
+    File file = File('${directory.path}/VOCA_LIST.json');
+    String jsonContent = await file.readAsString();
+    Map<String, dynamic> jsonData = jsonDecode(jsonContent);
+    // 단어장 파일 없애기
+    print(jsonContent);
+    print(voca_index);
+    String s = jsonData['vocalist'][voca_index];
+    print(s);
+    File file2 = File('${directory.path}/$s.json');
+    await file2.delete();
+    // 단어장 목록에서 특정 단어장 삭제
+    jsonData['vocalist'].removeAt(voca_index);
+    // 삭제한 단어가 적용되게 해당 단어장 json 파일 덮어쓰기
+    final updatedJsonString = json.encode(jsonData);
+    print(updatedJsonString);
+    await file.writeAsString(updatedJsonString);
 
-  List<Widget> buttonsList = [];
+    setState(() {
+      // ui에서 단어 삭제
+      buttonsList.removeAt(button_index);
+      buttonsList.removeAt(button_index - 1);
+      // Navigator.of(context).pop();
+    });
+  }
+
+
 
   Future<void> repeatListNum() async{ // 저장된 단어장 목록 읽기
     List<dynamic> li = await readJsonFile(); // VOCA_LIST json파일 읽어오기
@@ -70,7 +90,6 @@ class _InputDemoState extends State<InputDemo> {
         child: ElevatedButton(
           onPressed: () {
             selectedFileName = '$input_text';
-
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -82,7 +101,7 @@ class _InputDemoState extends State<InputDemo> {
             minimumSize: Size(150, 100),
             backgroundColor: Colors.white,
             // 글자 색상 및 애니메이션 색 설정
-            foregroundColor: Colors.black,
+            foregroundColor: input_text == 'complete' ? Colors.green : Colors.black,
             // 글자 그림자 설정
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
@@ -104,7 +123,7 @@ class _InputDemoState extends State<InputDemo> {
     });
   }
 
-  void addButton(String input_text) {
+  void addButton(String input_text) async {
     Widget newButton = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: ElevatedButton(
@@ -138,6 +157,7 @@ class _InputDemoState extends State<InputDemo> {
         )
     );
     Widget space = SizedBox(height: 10); // 원하는 높이로 조절
+
     setState(() {
       buttonsList.add(space);
       buttonsList.add(newButton);
@@ -169,15 +189,21 @@ class _InputDemoState extends State<InputDemo> {
     final directory = await getApplicationDocumentsDirectory();
     File file = File('${directory.path}/VOCA_LIST.json');
 
+<<<<<<< Updated upstream
 
     // await file.delete(); // 파일 초기화하기
     //
     // print('${file.path}\n');
     // print(file.path.toString());
+=======
+    // await file.delete(); // 파일 초기화하기
+>>>>>>> Stashed changes
 
-    // 파일이 없으면 생성해 주기
+    // VOCA_LIST 파일이 없으면 생성해 주기
     if (!file.existsSync()) {
-      file.writeAsString('{"vocalist": []}');
+      file.writeAsString('{"vocalist": ["complete"]}');
+      File file2 = File('${directory.path}/complete.json');
+      file2.writeAsString('{"words": []}');
     }
 
     String jsonContent = await file.readAsString();
@@ -204,13 +230,14 @@ class _InputDemoState extends State<InputDemo> {
             ),
             ),
             backgroundColor: backColor,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {},
-            ),
-            title: Text(
-              'voca list',
-              style: TextStyle(fontSize: 28),
+            title: Row(
+              children: [
+                SizedBox(width: 15,),
+                Text(
+                  'voca list',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             actions: [
               Padding(
@@ -232,7 +259,7 @@ class _InputDemoState extends State<InputDemo> {
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
-                    '자신만의 단어장을 \n 만들어보세요!',
+                    '자신만의 단어장을 \n 만들어보세요',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xffB6B1B1),
@@ -249,7 +276,65 @@ class _InputDemoState extends State<InputDemo> {
                       physics: ClampingScrollPhysics(),
                       itemCount: buttonsList.length,
                       itemBuilder: (context, index) {
-                        return buttonsList[index];
+                        // return buttonsList[index];
+                        if ( index == 1 || index % 2 == 0 ){
+                          return SizedBox(
+                              width: MediaQuery.of(context).size.width ,
+                              child: buttonsList[index]);
+                        }
+                        return Slidable(
+                            key: ValueKey(index),
+                            startActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) => showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: Colors.white,
+                                    isScrollControlled: true,
+                                    builder: (context) {
+                                      return SizedBox(
+                                        height: 150,
+                                        width: double.infinity,
+                                        child: Column(
+                                          children: [
+                                            //안에 들어갈 아이템 추가
+                                            Text("\n단어장을 삭제하시겠습니까?",style: TextStyle(
+                                              fontSize: 15.0, // 원하는 폰트 크기로 설정
+                                              fontWeight: FontWeight.w500,
+                                            ),),
+                                            TextButton( onPressed: () {
+                                              _deleteItem(index);
+                                              Navigator.of(context).pop();
+                                            },
+                                                child: Text("예")),
+                                            TextButton( onPressed: () {
+                                              Navigator.of(context).pop(); // 모달 닫기
+                                            }, child: Text("아니요"))
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20),
+                                        topRight: Radius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  label: 'Delete',
+                                ),
+                              ],
+                            ),
+                            child: SizedBox(
+                                width: MediaQuery.of(context).size.width ,
+                                child: buttonsList[index])
+
+                        );
                         },
                     ),
                   ),
@@ -276,10 +361,47 @@ class _InputDemoState extends State<InputDemo> {
                               actions: <Widget>[
                                 ElevatedButton(
                                   child: Text('확인'),
-                                  onPressed: () {
-                                    addButton(customController.text);
-                                    // 여기서 customController.text를 사용하여 입력값 처리
-                                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                                  onPressed: () async {
+                                    bool validName = true;
+                                    final directory = await getApplicationDocumentsDirectory();
+                                    File file = File('${directory.path}/VOCA_LIST.json');
+                                    String jsonContent = await file.readAsString();
+                                    Map<String, dynamic> data = jsonDecode(jsonContent);
+                                    List<dynamic> li = data['vocalist'];
+                                    for (int i = 0; i < li.length; i++) {
+                                      if (customController.text == '') {
+                                        Fluttertoast.showToast(
+                                          msg: "이름이 있어야 해요",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          // 토스트 메시지 표시 시간 설정
+                                          gravity: ToastGravity.BOTTOM,
+                                          // 토스트 메시지의 위치 설정
+                                          backgroundColor: Colors.grey,
+                                          // 배경색 설정
+                                          textColor: Colors.white, // 텍스트 색상 설정
+                                        );
+                                        validName = false;
+                                      }
+                                      else if (customController.text == li[i]) {
+                                        Fluttertoast.showToast(
+                                          msg: "이미 ${customController.text} 단어장이 존재합니다",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          // 토스트 메시지 표시 시간 설정
+                                          gravity: ToastGravity.BOTTOM,
+                                          // 토스트 메시지의 위치 설정
+                                          backgroundColor: Colors.grey,
+                                          // 배경색 설정
+                                          textColor: Colors.white, // 텍스트 색상 설정
+                                        );
+                                        validName = false;
+                                      }
+                                    }
+
+                                    if (validName) {
+                                      addButton(customController.text);
+                                      // 여기서 customController.text를 사용하여 입력값 처리
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    }
                                   },
                                 ),
                               ],

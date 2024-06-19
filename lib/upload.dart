@@ -1,10 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+<<<<<<< Updated upstream
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:temp/resultStreamScreen.dart';
 import 'result.dart';
+=======
+import 'package:flutter/widgets.dart';
+import 'resultStreamScreen.dart';
+import 'camera_screen.dart';
+>>>>>>> Stashed changes
 import 'widgets/my_bottom_bar.dart';
 
 var backColor = Color(0xffeeebeb);
@@ -15,9 +22,10 @@ class UploadPDF extends StatefulWidget {
 }
 
 class _UploadPDFState extends State<UploadPDF> {
-  late final selectedPDF; // 선택할 pdf 파일
+  late var selectedPDF; // 선택할 pdf 파일
   late List<int> fileBytes = selectedPDF.files.single.bytes!;
   String fileName = '';
+  bool isPdf = true;
   List<dynamic> jsonData = [];
 
   // 휴대폰에서 PDF 파일 선택하기
@@ -26,7 +34,7 @@ class _UploadPDFState extends State<UploadPDF> {
       // 파일 선택 다이얼로그 열기
       selectedPDF = await FilePicker.platform.pickFiles(
           type: FileType.custom,
-          allowedExtensions: ['pdf'],
+          allowedExtensions: ['pdf', 'png', 'jpg'],
           withData: true
         // allowMultiple: true, // 여러 파일 선택 허용
       );
@@ -38,6 +46,7 @@ class _UploadPDFState extends State<UploadPDF> {
         print(selectedPDF.names[0]);
         setState(() {
           fileName = selectedPDF.names[0];
+          isPdf = ("pdf" == fileName.split('.').last.toLowerCase());
         });
 
         // await _uploadFile(fileBytes);
@@ -67,8 +76,6 @@ class _UploadPDFState extends State<UploadPDF> {
       );
       // ProgressDialog를 사용하여 파일 업로드를 비동기적으로 진행
 
-
-
       // 서버 응답 확인
       if (response.statusCode == 200) {
         print('파일 업로드 성공!');
@@ -82,6 +89,7 @@ class _UploadPDFState extends State<UploadPDF> {
     }
   }
 
+<<<<<<< Updated upstream
   // Future<void> showProgress() async {
   //   await showDialog(
   //     context: context,
@@ -98,18 +106,51 @@ class _UploadPDFState extends State<UploadPDF> {
   // }
 
   // go to ResultStreamScreen
+=======
+  Future<void> _openCamera() async {
+    final imageFile = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CameraScreen()),
+    );
+
+    if (imageFile != null) {
+      final pickedFile = PlatformFile(
+        name: imageFile.path.split('/').last,
+        path: imageFile.path,
+        bytes: imageFile.readAsBytesSync(),
+        size: imageFile.lengthSync(),
+      );
+
+      selectedPDF = FilePickerResult([pickedFile]);
+
+      setState(() {
+        fileBytes = pickedFile.bytes!;
+        fileName = pickedFile.name;
+        isPdf = false; // 이미지는 PDF가 아님
+      });
+    }
+  }
+
+>>>>>>> Stashed changes
   Future<void> showProgress() async {
     List<int> fileBytes = selectedPDF.files.single.bytes!;
     // 페이지 이동 로직
     Navigator.push(
       context,
       MaterialPageRoute(
+<<<<<<< Updated upstream
         builder: (context) => ResultStreamScreen(data: fileBytes),
+=======
+        builder: (context) => ResultStreamScreen(data: fileBytes, fileName: fileName),
+>>>>>>> Stashed changes
       ),
     );
   }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -122,13 +163,15 @@ class _UploadPDFState extends State<UploadPDF> {
           ),
           ),
           backgroundColor: backColor,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {},
-          ),
-          title: Text(
-            'upload',
-            style: TextStyle(fontSize: 28),
+
+          title: Row(
+            children: [
+              SizedBox(width: 15,),
+              Text(
+                'upload',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           actions: [
             Padding(
@@ -200,9 +243,29 @@ class _UploadPDFState extends State<UploadPDF> {
                               SizedBox(
                                 height: 15,
                               ),
-                              TextButton(
-                                onPressed: _openFileExplorer,
-                                child: Text('파일 선택'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                    onPressed: _openFileExplorer,
+                                    child: Column(
+                                      children: [
+                                        Icon(Icons.folder_open, size: 30, color: Colors.green,),
+                                        Text('찾기', style: TextStyle(fontSize: 12, color: Colors.grey[700]),),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 15,),
+                                  TextButton(
+                                    onPressed: _openCamera,
+                                    child: Column(
+                                      children: [
+                                        Icon(Icons.camera_alt_outlined, size: 30, color: Colors.green,),
+                                        Text('카메라', style: TextStyle(fontSize: 12, color: Colors.grey[700]),),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -214,46 +277,48 @@ class _UploadPDFState extends State<UploadPDF> {
                     flex: 1,
                     child: Center(
                       child: Container(
-                        height: 100,
-                        width: 80,
+                        height: 150,
+                        width: 100,
+                        padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Center(
-                          child: Container(
-                            height: 90,
-                            width: 65,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Color(0xffCCCCCC), //////
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Color(0xffCCCCCC), //////
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 78,
+                                child: Center(
+                                  child: Image.asset(
+                                    isPdf ? "images/pdf.png" : "images/image.png",
+                                    height: 65,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 70,
-                                  child: Center(
-                                    child: Image.asset(
-                                      "images/pdf.png",
-                                      height: 60,
+                              Container(
+                                color: Color(0xffCCCCCC),
+                                height: 1,
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '$fileName',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xff666666),
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                Container(
-                                  color: Color(0xffCCCCCC),
-                                  height: 2,
-                                ),
-                                Text(
-                                  '$fileName',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Color(0xff666666),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -264,21 +329,6 @@ class _UploadPDFState extends State<UploadPDF> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("추출 단어 수:   "),
-                            Container(
-                              width: 80,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.black),
-                              ),
-                            )
-                          ],
-                        ),
                         Container(
                           width: 110,
                           height: 35,

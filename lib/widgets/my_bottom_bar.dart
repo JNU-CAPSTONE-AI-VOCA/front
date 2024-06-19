@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../upload.dart';
+import '../study.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   int currentBranch;
@@ -12,6 +14,7 @@ class MyBottomNavigationBar extends StatelessWidget {
   List _pages = [
     UploadPDF(),
     InputDemo(),
+    Study(),
   ];
 
   @override
@@ -30,7 +33,7 @@ class MyBottomNavigationBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'upload'),
         BottomNavigationBarItem(icon: Icon(Icons.book), label: 'vocabulary'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle), label: 'menu'),
+            icon: Icon(CupertinoIcons.book), label: 'study'),
       ],
     );
   }

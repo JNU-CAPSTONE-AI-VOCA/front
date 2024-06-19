@@ -7,7 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'widgets/my_bottom_bar.dart';
+<<<<<<< Updated upstream
 import 'voca.dart';
+=======
+import 'widgets/voca.dart';
+>>>>>>> Stashed changes
 import 'voca_list.dart';
 
 var backColor = Color(0xffeeebeb);
@@ -18,20 +22,36 @@ Map<String, dynamic> word = {};
 
 class ResultStreamScreen extends StatefulWidget {
   final List<int> data;
+<<<<<<< Updated upstream
 
   ResultStreamScreen({Key? key, required this.data}) : super(key: key);
 
   @override
   _ResultStreamScreenState createState() => _ResultStreamScreenState(fileBytes: data);
+=======
+  String fileName = '';
+
+  ResultStreamScreen({Key? key, required this.data, required this.fileName}) : super(key: key);
+
+  @override
+  _ResultStreamScreenState createState() => _ResultStreamScreenState(fileBytes: data, fileName: fileName);
+>>>>>>> Stashed changes
 }
 
 class _ResultStreamScreenState extends State<ResultStreamScreen> {
   List jsonData = [];
   List tmpJsonData = [];
   List<int> fileBytes= [];
+<<<<<<< Updated upstream
 
 
   _ResultStreamScreenState({required this.fileBytes});
+=======
+  String fileName = '';
+
+
+  _ResultStreamScreenState({required this.fileBytes, required this.fileName});
+>>>>>>> Stashed changes
   @override
   void initState() {
     super.initState();
@@ -42,6 +62,7 @@ class _ResultStreamScreenState extends State<ResultStreamScreen> {
 
   void sseConnect() async {
     var response = await Dio().post(
+<<<<<<< Updated upstream
         'http://10.0.2.2:8080/api/files/extract/words/stream',
         data: FormData.fromMap({
           'files': MultipartFile.fromBytes(fileBytes, filename: Uuid().v4() + '.pdf'),
@@ -50,6 +71,17 @@ class _ResultStreamScreenState extends State<ResultStreamScreen> {
           contentType: 'multipart/form-data',
           responseType: ResponseType.stream,
         ),
+=======
+      'http://13.124.234.107:8080/api/files/extract/words/stream',
+      data: FormData.fromMap({
+        'files': MultipartFile.fromBytes(fileBytes, filename: fileName),
+      }),
+      // Uuid().v4() + '.pdf'
+      options: Options(
+        contentType: 'multipart/form-data',
+        responseType: ResponseType.stream,
+      ),
+>>>>>>> Stashed changes
     );
 
     response.data.stream.listen((data) {
@@ -252,7 +284,11 @@ class _ResultStreamScreenState extends State<ResultStreamScreen> {
           if (j['isChecked'] != null ) {
             if (j['isChecked']) { // 체크된 항목이라면
               // 주의 : 서버에서 받은 데이터는 meaning 이고 우리는 mean 으로 사용할 것임
+<<<<<<< Updated upstream
               Voca voca = Voca(word: j['word'], mean: j['meaning'], sentence: i['sentence']); // {word, mean, sentence}
+=======
+              Voca voca = Voca(word: j['word'], meaning: j['meaning'], sentence: i['sentence']); // {word, meaning, sentence}
+>>>>>>> Stashed changes
               fileMap['words'].add(voca); // 리스트에 추가함, 아직 파일에 쓰지는 않았음
             }
           }
