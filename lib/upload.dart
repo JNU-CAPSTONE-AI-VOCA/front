@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-<<<<<<< Updated upstream
-import 'package:future_progress_dialog/future_progress_dialog.dart';
-import 'package:temp/resultStreamScreen.dart';
-import 'result.dart';
-=======
+
 import 'package:flutter/widgets.dart';
 import 'resultStreamScreen.dart';
 import 'camera_screen.dart';
->>>>>>> Stashed changes
 import 'widgets/my_bottom_bar.dart';
 
 var backColor = Color(0xffeeebeb);
@@ -89,24 +84,7 @@ class _UploadPDFState extends State<UploadPDF> {
     }
   }
 
-<<<<<<< Updated upstream
-  // Future<void> showProgress() async {
-  //   await showDialog(
-  //     context: context,
-  //     builder: (context) =>
-  //         FutureProgressDialog(_uploadFile(), message: Text('Loading...'),),
-  //   );
-  //   // 페이지 이동 로직
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => VocabularyListScreen(data: jsonData),
-  //     ),
-  //   );
-  // }
 
-  // go to ResultStreamScreen
-=======
   Future<void> _openCamera() async {
     final imageFile = await Navigator.push(
       context,
@@ -131,26 +109,19 @@ class _UploadPDFState extends State<UploadPDF> {
     }
   }
 
->>>>>>> Stashed changes
   Future<void> showProgress() async {
     List<int> fileBytes = selectedPDF.files.single.bytes!;
     // 페이지 이동 로직
     Navigator.push(
       context,
       MaterialPageRoute(
-<<<<<<< Updated upstream
-        builder: (context) => ResultStreamScreen(data: fileBytes),
-=======
+
         builder: (context) => ResultStreamScreen(data: fileBytes, fileName: fileName),
->>>>>>> Stashed changes
       ),
     );
   }
 
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
